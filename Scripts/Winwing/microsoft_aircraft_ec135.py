@@ -404,8 +404,8 @@ if __name__ == "__main__":
 
             # MISC
             xmsnOilTemp= as01(vr.get("(L:xmsnOilTemp)"))      # XMSN OIL T
-            autopilot  = as01(vr.get("(L:autopilot)"))        # AUTOPILOT
             rotorBrake = as01(vr.get("(L:rotorBrake)"))       # ROTOR BRAKE
+			autopilot  = as01(vr.get("(L:autopilot)"))        # AUTOPILOT
             fuelPumpAf = as01(vr.get("(L:fuelPumpAft)"))      # F PUMP AFT
             fuelPumpFw = as01(vr.get("(L:fuelPumpFwd)"))      # F PUMP FWD
             batDisc    = as01(vr.get("(L:batDisc)"))          # BAT DISCON
@@ -523,4 +523,5 @@ if __name__ == "__main__":
             logging.exception(f"Loop error: {e}")
 
         sleep(0.1)  # tick rate
+
 
