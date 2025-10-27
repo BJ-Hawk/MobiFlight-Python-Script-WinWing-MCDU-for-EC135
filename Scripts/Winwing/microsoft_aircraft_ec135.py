@@ -466,8 +466,8 @@ if __name__ == "__main__":
 
             misc_pairs = [
                 (xmsnOilTemp, "XMSN OIL T"),
-                (autopilot,   "AUTOPILOT"),
                 (rotorBrake,  "ROTOR BRAKE"),
+				(autopilot,   "AUTOPILOT"),
                 (fuelPumpAf,  "F PUMP AFT"),
                 (fuelPumpFw,  "F PUMP FWD"),
                 (batDisc,     "BAT DISCON"),
@@ -523,5 +523,6 @@ if __name__ == "__main__":
             logging.exception(f"Loop error: {e}")
 
         sleep(0.1)  # tick rate
+
 
 
