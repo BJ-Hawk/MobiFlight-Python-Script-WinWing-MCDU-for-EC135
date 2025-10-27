@@ -374,7 +374,7 @@ if __name__ == "__main__":
             redund1     = as01(vr.get("(L:redund1)"))         # REDUND
             eng1HydPr   = as01(vr.get("(L:hydraulic1)"))      # HYD PRESS
             gen1disc    = as01(vr.get("(L:genDiscon1)"))      # GEN DISCON
-            inverter1   = as01(vr.get("(L:inverter1)"))       # INVERTER
+            inverter1   = as01(vr.get("(L:inv1)"))            # INVERTER
             fireTest1Ext= as01(vr.get("(L:fireTest1Ext)"))    # FIRE EXT
             fireTest1   = as01(vr.get("(L:fireTest1)"))       # FIRE TEST
             bustie1     = as01(vr.get("(L:bustie1)"))         # BUS TIE
@@ -396,7 +396,7 @@ if __name__ == "__main__":
             redund2     = as01(vr.get("(L:redund2)"))         # REDUND
             eng2HydPr   = as01(vr.get("(L:hydraulic2)"))      # HYD PRESS
             gen2disc    = as01(vr.get("(L:genDiscon2)"))      # GEN DISCON
-            inverter2   = as01(vr.get("(L:inverter2)"))       # INVERTER
+            inverter2   = as01(vr.get("(L:inve2)"))           # INVERTER
             fireTest2Ext= as01(vr.get("(L:fireTest2Ext)"))    # FIRE EXT
             fireTest2   = as01(vr.get("(L:fireTest2)"))       # FIRE TEST
             bustie2     = as01(vr.get("(L:bustie2)"))         # BUS TIE
@@ -415,10 +415,6 @@ if __name__ == "__main__":
             # GREEN
             pitotPilot = as01(vr.get("(L:pitotPilot)"))       # P/S-HTR-P
             pitotCoPi  = as01(vr.get("(L:pitotCoPilot)"))     # P/S-HTR-C
-            
-            # INVERTER have inverted logic
-            inverter1 = 0 if inverter1 >= 1 else 1
-            inverter2 = 0 if inverter2 >= 1 else 1
 
             # Rolling (compacted) lists
             # -------- Build rolling (compacted) lists --------
@@ -527,3 +523,4 @@ if __name__ == "__main__":
             logging.exception(f"Loop error: {e}")
 
         sleep(0.1)  # tick rate
+
