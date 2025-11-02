@@ -238,8 +238,8 @@ def grid_to_payload(grid: List[List[Cell]]) -> str:
 LEFT_COL_START  = 0
 RIGHT_COL_START = 13
 CONTENT_FIRST_ROW = 0
-CONTENT_LAST_ROW  = CDU_ROWS - 2   # keep last row (13) free
-MAX_ROWS = CONTENT_LAST_ROW - CONTENT_FIRST_ROW + 1  # usually 12
+CONTENT_LAST_ROW  = 5
+MAX_ROWS = CONTENT_LAST_ROW - CONTENT_FIRST_ROW + 1  
 
 def clear_area_with_spaces(grid, r0, r1, c0=0, c1=CDU_COLUMNS, colour="w", size=0):
     for r in range(r0, r1 + 1):
@@ -357,7 +357,9 @@ if __name__ == "__main__":
     while True:
         try:
             # HELPERS
-            cdsPage = as01(vr.get("(L:cdsPage)"))
+            cdsPage     = as01(vr.get("(L:cdsPage)"))
+            cdsBreaker  = as01(vr.get("(L:brkCDS1)"))
+            
             # LEFT
             engine1Fail = as01(vr.get("(L:engine1Fail)"))     # ENG FAIL
             eng1OilPr   = as01(vr.get("(L:engine1OilPress)")) # ENG OIL P
@@ -396,7 +398,7 @@ if __name__ == "__main__":
             redund2     = as01(vr.get("(L:redund2)"))         # REDUND
             eng2HydPr   = as01(vr.get("(L:hydraulic2)"))      # HYD PRESS
             gen2disc    = as01(vr.get("(L:genDiscon2)"))      # GEN DISCON
-            inverter2   = as01(vr.get("(L:inve2)"))           # INVERTER
+            inverter2   = as01(vr.get("(L:inv2)"))            # INVERTER
             fireTest2Ext= as01(vr.get("(L:fireTest2Ext)"))    # FIRE EXT
             fireTest2   = as01(vr.get("(L:fireTest2)"))       # FIRE TEST
             bustie2     = as01(vr.get("(L:bustie2)"))         # BUS TIE
@@ -405,7 +407,7 @@ if __name__ == "__main__":
             # MISC
             xmsnOilTemp= as01(vr.get("(L:xmsnOilTemp)"))      # XMSN OIL T
             rotorBrake = as01(vr.get("(L:rotorBrake)"))       # ROTOR BRAKE
-			autopilot  = as01(vr.get("(L:autopilot)"))        # AUTOPILOT
+            autopilot  = as01(vr.get("(L:autopilot)"))        # AUTOPILOT
             fuelPumpAf = as01(vr.get("(L:fuelPumpAft)"))      # F PUMP AFT
             fuelPumpFw = as01(vr.get("(L:fuelPumpFwd)"))      # F PUMP FWD
             batDisc    = as01(vr.get("(L:batDisc)"))          # BAT DISCON
@@ -415,7 +417,11 @@ if __name__ == "__main__":
             # GREEN
             pitotPilot = as01(vr.get("(L:pitotPilot)"))       # P/S-HTR-P
             pitotCoPi  = as01(vr.get("(L:pitotCoPilot)"))     # P/S-HTR-C
-
+            cdsAck     = as01(vr.get("(L:cdsSelfTestAcknoledge)"))       # CDS PASSED & INP PASSED
+            landLight  = as01(vr.get("(L:landLight)"))        # LDG LIGHT
+            landLiExt  = as01(vr.get("(L:landLightExtr)"))    # LDG LIGHT RET/EXT
+            airCond    = as01(vr.get("(L:airCond)"))          # AIR COND
+            
             # Rolling (compacted) lists
             # -------- Build rolling (compacted) lists --------
             left_pairs = [
@@ -467,7 +473,7 @@ if __name__ == "__main__":
             misc_pairs = [
                 (xmsnOilTemp, "XMSN OIL T"),
                 (rotorBrake,  "ROTOR BRAKE"),
-				(autopilot,   "AUTOPILOT"),
+                (autopilot,   "AUTOPILOT"),
                 (fuelPumpAf,  "F PUMP AFT"),
                 (fuelPumpFw,  "F PUMP FWD"),
                 (batDisc,     "BAT DISCON"),
@@ -480,7 +486,6 @@ if __name__ == "__main__":
             right_labels = compact_labels(right_pairs)
             misc_labels  = [label for val, label in misc_pairs if val == 1]
 
-
             # paging (cdsPage: 0,1,2) — 6 rows per page for ALL THREE lists
             page_size = 6
             start = cdsPage * page_size
@@ -492,37 +497,43 @@ if __name__ == "__main__":
 
             # Draw & send
             grid = empty_grid()
-
-            # left/right columns (clears rows 1..12 internally)
-            draw_columns(grid, visible_left, visible_right)
-
-            # --- MISC block ---
-            # Title centered on row 7
             put_text_center(grid, "MISC", 6, colour="k", size=LARGE)
+            if cdsBreaker == 1: #Check if CDS has power
+                # left/right columns (clears rows 1..6 internally)
+                draw_columns(grid, visible_left, visible_right)
 
-            # Clear the MISC content area (rows 7..12) each tick, then draw the 6 visible lines
-            clear_area_with_spaces(grid, 7, 12)
-            misc_rows = [7, 8, 9, 10, 11, 12]
-            for i, row in enumerate(misc_rows):
-                if i < len(visible_misc):
-                    put_text_center(grid, visible_misc[i], row, colour="a", size=LARGE)
-                # else: already cleared to spaces
+                # --- MISC block (2 columns × 3 rows, fill left column first) ---
+                # Split page into two 3-item columns
+                misc_left  = visible_misc[:3]
+                misc_right = visible_misc[3:6]
 
-            # --- Green block ---
-            # last row clear
-            clear_area_with_spaces(grid, 13, 13, 0, 12)
-            clear_area_with_spaces(grid, 13, 13, 13, 24)
+                # Paint left column (cols 0..11), rows 8..10
+                for i, label in enumerate(misc_left):
+                    put_text(grid, label[:11].ljust(11), 7 + i, 0, colour="a", size=LARGE)
 
-            if pitotPilot == 1:
-                put_text(grid, "P/S-HTR-P", 13, 0,  colour="g", size=LARGE)
-            if pitotCoPi == 1:
-                put_text(grid, "P/S-HTR-C", 13, 13, colour="g", size=LARGE)
+                # Paint right column (cols 13..23), rows 8..10
+                for i, label in enumerate(misc_right):
+                    put_text(grid, label[:11].ljust(11), 7 + i, 13, colour="a", size=LARGE)
+
+                # --- Green block ---
+                if pitotPilot == 1: put_text(grid, "P/S-HTR-P", 10, 0,  colour="g", size=LARGE)
+                if pitotCoPi  == 1: put_text(grid, "P/S-HTR-C", 10, 13, colour="g", size=LARGE)
+
+                if cdsAck == 0:
+                    row11, row12, row13 = "CDS PASSED", "INP PASSED", None
+                else:
+                    row11 = "LDG L EXT" if landLiExt == 1 else "LDG L RET"
+                    if landLight == 1:
+                        row12, row13 = "LDG LIGHT", ("AIR COND " if airCond == 1 else None)
+                    else:
+                        row12, row13 = ("AIR COND " if airCond == 1 else None), None
+
+                for r, txt in ((11, row11), (12, row12), (13, row13)):
+                    if txt: put_text_center(grid, txt, r, colour="g", size=LARGE)
+            # MCDU send
             mcdu.send_grid(grid)
 
         except Exception as e:
             logging.exception(f"Loop error: {e}")
 
         sleep(0.1)  # tick rate
-
-
-
